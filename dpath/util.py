@@ -8,6 +8,7 @@ _DEFAULT_SENTINAL = object()
 MERGE_REPLACE = (1 << 1)
 MERGE_ADDITIVE = (1 << 2)
 MERGE_TYPESAFE = (1 << 3)
+MERGE_REPLACE_RECURSIVE = (1 << 4)
 
 def __safe_path__(path, separator):
     '''
@@ -334,6 +335,13 @@ def merge(dst, src, separator='/', afilter=None, flags=MERGE_ADDITIVE):
                 if flags & MERGE_ADDITIVE:
                     target += found
                     continue
+
+                if flags & MERGE_REPLACE_RECURSIVE:
+                    for i, v in enumerate(found):
+                        if isinstance(target[i], dict) and isinstance(v, dict):
+                            merger(target[i], v)
+                        else:
+                            target[i] = v
 
                 if flags & MERGE_REPLACE:
                     try:
